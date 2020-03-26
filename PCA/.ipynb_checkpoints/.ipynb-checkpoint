@@ -1,0 +1,1064 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### 2.1 Carga de los datos y librerías\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import pandas as pd\n",
+    "import numpy as np\n",
+    "import matplotlib.pyplot as plt\n",
+    "from sklearn.decomposition import PCA \n",
+    "from sklearn.preprocessing import StandardScaler\n",
+    "%matplotlib inline\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "my_sheet = 'Sheet1'\n",
+    "file_name = 'PCA_exercise_1.xlsx' # name of your excel file\n",
+    "df_in = pd.read_excel(file_name, sheet_name = my_sheet)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Unnamed: 0</th>\n",
+       "      <th>Unnamed: 1</th>\n",
+       "      <th>Unnamed: 2</th>\n",
+       "      <th>Unnamed: 3</th>\n",
+       "      <th>Unnamed: 4</th>\n",
+       "      <th>Unnamed: 5</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <td>0</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>Object 1</td>\n",
+       "      <td>Object 2</td>\n",
+       "      <td>Object 3</td>\n",
+       "      <td>Object 4</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <td>1</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>Band 1</td>\n",
+       "      <td>375</td>\n",
+       "      <td>135</td>\n",
+       "      <td>458</td>\n",
+       "      <td>475</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <td>2</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>Band 2</td>\n",
+       "      <td>57</td>\n",
+       "      <td>47</td>\n",
+       "      <td>53</td>\n",
+       "      <td>73</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <td>3</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>Band 3</td>\n",
+       "      <td>245</td>\n",
+       "      <td>267</td>\n",
+       "      <td>242</td>\n",
+       "      <td>227</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <td>4</td>\n",
+       "      <td>NaN</td>\n",
+       "      <td>Band 4</td>\n",
+       "      <td>1472</td>\n",
+       "      <td>1494</td>\n",
+       "      <td>1462</td>\n",
+       "      <td>1582</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "   Unnamed: 0 Unnamed: 1 Unnamed: 2 Unnamed: 3 Unnamed: 4 Unnamed: 5\n",
+       "0         NaN        NaN   Object 1   Object 2   Object 3   Object 4\n",
+       "1         NaN     Band 1        375        135        458        475\n",
+       "2         NaN     Band 2         57         47         53         73\n",
+       "3         NaN     Band 3        245        267        242        227\n",
+       "4         NaN     Band 4       1472       1494       1462       1582"
+      ]
+     },
+     "execution_count": 3,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df_in.head() # shows headers with top 5 rows"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#Cleaning the data\n",
+    "df_in.drop(df_in.columns[[0,1]],axis=1, inplace = True )\n",
+    "df_in.drop(0,inplace = True)\n",
+    "df_in.rename(columns={'Unnamed: 1':'Band','Unnamed: 2':'1', 'Unnamed: 3':'2', 'Unnamed: 4':'3', 'Unnamed: 5':'4'}, inplace=True)\n",
+    "df_in.rename(index={1: 'Band 1',2: 'Band 2',3: 'Band 3',4: 'Band 4',5: 'Band 5',6: 'Band 6',7: 'Band 7',8: 'Band 8',9: 'Band 9',\n",
+    "                    10: 'Band 10',11: 'Band 11',12: 'Band 12',13: 'Band 13',14: 'Band 14',15: 'Band 15',16: 'Band 16',17: 'Band 17'}, inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>1</th>\n",
+       "      <th>2</th>\n",
+       "      <th>3</th>\n",
+       "      <th>4</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <td>Band 1</td>\n",
+       "      <td>375</td>\n",
+       "      <td>135</td>\n",
+       "      <td>458</td>\n",
+       "      <td>475</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <td>Band 2</td>\n",
+       "      <td>57</td>\n",
+       "      <td>47</td>\n",
+       "      <td>53</td>\n",
+       "      <td>73</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <td>Band 3</td>\n",
+       "      <td>245</td>\n",
+       "      <td>267</td>\n",
+       "      <td>242</td>\n",
+       "      <td>227</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <td>Band 4</td>\n",
+       "      <td>1472</td>\n",
+       "      <td>1494</td>\n",
+       "      <td>1462</td>\n",
+       "      <td>1582</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <td>Band 5</td>\n",
+       "      <td>105</td>\n",
+       "      <td>66</td>\n",
+       "      <td>103</td>\n",
+       "      <td>103</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "           1     2     3     4\n",
+       "Band 1   375   135   458   475\n",
+       "Band 2    57    47    53    73\n",
+       "Band 3   245   267   242   227\n",
+       "Band 4  1472  1494  1462  1582\n",
+       "Band 5   105    66   103   103"
+      ]
+     },
+     "execution_count": 5,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df_in.head() # shows headers with top 5 rows"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>Band 1</th>\n",
+       "      <th>Band 2</th>\n",
+       "      <th>Band 3</th>\n",
+       "      <th>Band 4</th>\n",
+       "      <th>Band 5</th>\n",
+       "      <th>Band 6</th>\n",
+       "      <th>Band 7</th>\n",
+       "      <th>Band 8</th>\n",
+       "      <th>Band 9</th>\n",
+       "      <th>Band 10</th>\n",
+       "      <th>Band 11</th>\n",
+       "      <th>Band 12</th>\n",
+       "      <th>Band 13</th>\n",
+       "      <th>Band 14</th>\n",
+       "      <th>Band 15</th>\n",
+       "      <th>Band 16</th>\n",
+       "      <th>Band 17</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <td>1</td>\n",
+       "      <td>375</td>\n",
+       "      <td>57</td>\n",
+       "      <td>245</td>\n",
+       "      <td>1472</td>\n",
+       "      <td>105</td>\n",
+       "      <td>54</td>\n",
+       "      <td>193</td>\n",
+       "      <td>147</td>\n",
+       "      <td>1102</td>\n",
+       "      <td>720</td>\n",
+       "      <td>253</td>\n",
+       "      <td>685</td>\n",
+       "      <td>488</td>\n",
+       "      <td>198</td>\n",
+       "      <td>360</td>\n",
+       "      <td>1374</td>\n",
+       "      <td>156</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <td>2</td>\n",
+       "      <td>135</td>\n",
+       "      <td>47</td>\n",
+       "      <td>267</td>\n",
+       "      <td>1494</td>\n",
+       "      <td>66</td>\n",
+       "      <td>41</td>\n",
+       "      <td>209</td>\n",
+       "      <td>93</td>\n",
+       "      <td>674</td>\n",
+       "      <td>1033</td>\n",
+       "      <td>143</td>\n",
+       "      <td>586</td>\n",
+       "      <td>355</td>\n",
+       "      <td>187</td>\n",
+       "      <td>334</td>\n",
+       "      <td>1506</td>\n",
+       "      <td>139</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <td>3</td>\n",
+       "      <td>458</td>\n",
+       "      <td>53</td>\n",
+       "      <td>242</td>\n",
+       "      <td>1462</td>\n",
+       "      <td>103</td>\n",
+       "      <td>62</td>\n",
+       "      <td>184</td>\n",
+       "      <td>122</td>\n",
+       "      <td>957</td>\n",
+       "      <td>566</td>\n",
+       "      <td>171</td>\n",
+       "      <td>750</td>\n",
+       "      <td>418</td>\n",
+       "      <td>220</td>\n",
+       "      <td>337</td>\n",
+       "      <td>1572</td>\n",
+       "      <td>147</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <td>4</td>\n",
+       "      <td>475</td>\n",
+       "      <td>73</td>\n",
+       "      <td>227</td>\n",
+       "      <td>1582</td>\n",
+       "      <td>103</td>\n",
+       "      <td>64</td>\n",
+       "      <td>235</td>\n",
+       "      <td>160</td>\n",
+       "      <td>1137</td>\n",
+       "      <td>874</td>\n",
+       "      <td>265</td>\n",
+       "      <td>803</td>\n",
+       "      <td>570</td>\n",
+       "      <td>203</td>\n",
+       "      <td>365</td>\n",
+       "      <td>1256</td>\n",
+       "      <td>175</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "  Band 1 Band 2 Band 3 Band 4 Band 5 Band 6 Band 7 Band 8 Band 9 Band 10  \\\n",
+       "1    375     57    245   1472    105     54    193    147   1102     720   \n",
+       "2    135     47    267   1494     66     41    209     93    674    1033   \n",
+       "3    458     53    242   1462    103     62    184    122    957     566   \n",
+       "4    475     73    227   1582    103     64    235    160   1137     874   \n",
+       "\n",
+       "  Band 11 Band 12 Band 13 Band 14 Band 15 Band 16 Band 17  \n",
+       "1     253     685     488     198     360    1374     156  \n",
+       "2     143     586     355     187     334    1506     139  \n",
+       "3     171     750     418     220     337    1572     147  \n",
+       "4     265     803     570     203     365    1256     175  "
+      ]
+     },
+     "execution_count": 6,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "df = df_in.transpose()\n",
+    "df.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Se divide la matriz del dataset \n",
+    "X = df.iloc[:,0:17].values\n",
+    "# la submatriz x contiene los valores de las primeras 4 columnas del dataframe y todas las filas\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[[375 57 245 1472 105 54 193 147 1102 720 253 685 488 198 360 1374 156]\n",
+      " [135 47 267 1494 66 41 209 93 674 1033 143 586 355 187 334 1506 139]\n",
+      " [458 53 242 1462 103 62 184 122 957 566 171 750 418 220 337 1572 147]\n",
+      " [475 73 227 1582 103 64 235 160 1137 874 265 803 570 203 365 1256 175]]\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(X)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### 2.2 Normalización"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#Aplicamos una transformación de los datos para poder aplicar las propiedades de la distribución normal\n",
+    "from sklearn.preprocessing import StandardScaler\n",
+    "X_std = StandardScaler().fit_transform(X)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(4, 17)"
+      ]
+     },
+     "execution_count": 10,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "X_std.shape"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(-3.2653618371328133e-18, 1.0)"
+      ]
+     },
+     "execution_count": 11,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "#Let's check whether the normalized data has a mean of zero and a standard deviation of one.\n",
+    "np.mean(X_std),np.std(X_std)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### 2.2.2 PCA analisis\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from sklearn.decomposition import PCA\n",
+    "\n",
+    "pca_stars = PCA(n_components =2)\n",
+    "principalComponents_stars = pca_stars.fit_transform(X_std)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "principal_stars_Df = pd.DataFrame(data = principalComponents_stars\n",
+    "             , columns = ['principal component 1', 'principal component 2'])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>principal component 1</th>\n",
+       "      <th>principal component 2</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <td>0</td>\n",
+       "      <td>-0.954490</td>\n",
+       "      <td>0.328318</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <td>1</td>\n",
+       "      <td>4.987462</td>\n",
+       "      <td>-1.826611</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <td>2</td>\n",
+       "      <td>0.487978</td>\n",
+       "      <td>3.233672</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <td>3</td>\n",
+       "      <td>-4.520951</td>\n",
+       "      <td>-1.735380</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "   principal component 1  principal component 2\n",
+       "0              -0.954490               0.328318\n",
+       "1               4.987462              -1.826611\n",
+       "2               0.487978               3.233672\n",
+       "3              -4.520951              -1.735380"
+      ]
+     },
+     "execution_count": 14,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "principal_stars_Df.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Explained variation per principal component: [0.68327871 0.24871288]\n"
+     ]
+    }
+   ],
+   "source": [
+    "print('Explained variation per principal component: {}'.format(pca_stars.explained_variance_ratio_))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "principal_stars_Df.rename(index={0:'Object 1',1:'Object 2', 2:'Object 3', 3:'Object 4'}, inplace=True)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/html": [
+       "<div>\n",
+       "<style scoped>\n",
+       "    .dataframe tbody tr th:only-of-type {\n",
+       "        vertical-align: middle;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe tbody tr th {\n",
+       "        vertical-align: top;\n",
+       "    }\n",
+       "\n",
+       "    .dataframe thead th {\n",
+       "        text-align: right;\n",
+       "    }\n",
+       "</style>\n",
+       "<table border=\"1\" class=\"dataframe\">\n",
+       "  <thead>\n",
+       "    <tr style=\"text-align: right;\">\n",
+       "      <th></th>\n",
+       "      <th>principal component 1</th>\n",
+       "      <th>principal component 2</th>\n",
+       "    </tr>\n",
+       "  </thead>\n",
+       "  <tbody>\n",
+       "    <tr>\n",
+       "      <td>Object 1</td>\n",
+       "      <td>-0.954490</td>\n",
+       "      <td>0.328318</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <td>Object 2</td>\n",
+       "      <td>4.987462</td>\n",
+       "      <td>-1.826611</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <td>Object 3</td>\n",
+       "      <td>0.487978</td>\n",
+       "      <td>3.233672</td>\n",
+       "    </tr>\n",
+       "    <tr>\n",
+       "      <td>Object 4</td>\n",
+       "      <td>-4.520951</td>\n",
+       "      <td>-1.735380</td>\n",
+       "    </tr>\n",
+       "  </tbody>\n",
+       "</table>\n",
+       "</div>"
+      ],
+      "text/plain": [
+       "          principal component 1  principal component 2\n",
+       "Object 1              -0.954490               0.328318\n",
+       "Object 2               4.987462              -1.826611\n",
+       "Object 3               0.487978               3.233672\n",
+       "Object 4              -4.520951              -1.735380"
+      ]
+     },
+     "execution_count": 17,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "principal_stars_Df.head()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "#### plot visualization"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 18,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "objects = ['Object 1', 'Object 2' ,'Object 3', 'Object 4']"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 33,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "<Figure size 432x288 with 0 Axes>"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    },
+    {
+     "data": {
+      "image/png": "iVBORw0KGgoAAAANSUhEUgAAAnkAAAJuCAYAAADM2hSCAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAADh0RVh0U29mdHdhcmUAbWF0cGxvdGxpYiB2ZXJzaW9uMy4xLjEsIGh0dHA6Ly9tYXRwbG90bGliLm9yZy8QZhcZAAAgAElEQVR4nOzdebgkZXn38e/NGgPKjqwDiCsaBRkTQcFBRA2ioLiBEUdFggvRF0VFiY4axahBcEFEhWFVFBNXiCPqgIKIM4CGqMSFAUUYGFlEthngfv94qqXpqT6nq0+fOecU38919XVOVz1VdXdXdfWva43MRJIkSe2y2lQXIEmSpNEz5EmSJLWQIU+SJKmFDHmSJEktZMiTJElqIUOeJElSCxnyRiQiFkbEKr0eTUTMi4iMiDmrcrrVtJdExJJVPV1pWBExp/q8zFtF05uyz2ediDggIi6LiNuquo6d6pokTa4HbcirVnLdj3sjYllEfD8iXjHV9bVVRGwdER+OiMURcXNErIiIGyLivIh4c0SsN9U1anSBKCJe0fUZe/aIylNDEbELcAbwUOAzwPuA/x5nmLk168msQuKlEfGuiPjbVVD+pBnFcu46bXARMb/me/fWiPhtRHwtIt4UERuNcHoZEQtHNb7JNFm1rjHqEc5A76v+rgk8BtgP2CMids7MwxuM5yBgVa/wPgV8CbhmFU93KBFxMKXmtYGfAV8EbgY2Ap4OHAv8K7DxVNWokTsESCCq/xdMbTmr1HT6fD6PMg8OysyLGg77M+Br1f+rAZsBzwc+CDw3IvbIzHtHVukM4jptaF8HLq/+fyiwNbAbsC/wwYh4c2bOn6LaWuVBH/Iyc17384jYE/gu8JaI+ERmLhlwPKt8RZ6Zy4Blq3q6w4iIA4HPUVaA+2fmt2vaPA349KquTZMjIh4D7A6cB2wIvCAiHp6ZS6e2slVjmn0+t6j+/nGIYS+vWU+uD/yc8sW8G7BwIsXNRK7TJuRrvSEuItYAXgMcB5wcEXdn5henorhWycwH5YOydSH79PtF1f8l1fNtq+fzgUcDZwE3APcBc6o2C3vHB8yphpsH7Ah8G7gFuAM4H9i1z/RXBw4FLgRuBe4EfgN8HnhUV7t51fjn1Ly2hZQV+2lVrXcCi4EDa6a3FvAm4BzgauBu4CbKl/M/9qlxCbBkwPf6ocCfqrqePU7btWu67UnZtXQTcBfwf8CHgfVq2i6sprMm8B7gt9UwvwJe19XuUOB/qvflD5Qtuqv1jKt7vj+WsjXjJuB24Ef9XgvlV/07KV+CdwB/Bn4IvLSmbfc0tqVs+VlW1bwI2GeM9+oA4AeUL5m7gF8CR/V5DzvLxMbAicB11Xz+X+DVPW3nV+3rHnP61VMzzY9VwxwIHFb9/44+bedW/ecCe1S13la9d98GHlczzKOr5WARcGP1eq6uXt9WNe3nVNOY19XtYuBeYNs+db2tGuatXd2eSNlis6Sa5o3ApZStNmsO8PncDfhmtdzdDVxf1fHeBu/tapRl+KfAX6pl8qfA6+lajrve17pH7WuuGXZ+n/5fpWs9WfMZXIvyGbyyep3ze9o1WX73A06nfPZvr17zYuBf6PncVu0fXi1/V1btb6n+nw88YqLLORNYpw3xWjp1bgv8M2W9dRewlLKsr7QerIbbCvgE8Ouq/U3AJcC/9mn7KeB31bz6E/AN4Ck1bed13iPKZ/sn1WtYMsBy23ktc8do8+qqzXXAQ7q6rwccAXyf8tlZTvnsfQN4ap9lt+4xr6fdV6vXfSdlfXMh8E99antE9Z7/pmp/UzU/TgA2qmk/7jI+aK3DPh70W/L6iOpv74kU21MW6P+jHN/yEMpCMZ7ZwNuBH1OC2ixgf+B7EbFjZl751wlHrEX5UnsW8HvgzGoa2wIvpISLXw8wzQ2Aiygrt5OB9YGXAmdExJaZ+dGuthtSfj1dRNmKeSOwOWWXzDkR8brM/PwA0+znxdU0Ls7MMXfXZebd3c8j4p8pxxDdDnyFEljnAO8Anh8RT8vMW2pG9SXgHyjBdUVVw4kRsYLyJf0q4FvA94AXUL6M7gD+vWZc21Hm3RXAZynvzcuAcyPiwMw8q6vetYDvAM+gBMtPU3bjvxg4q5rf76qZxjaUFfDvKMF8w2oaX4+IZ2XmD3rely9QfvX+AfhPynx+KvABYM+I2Csz7+mZxvqUFdhy4Gzgb6q6ToqI+zLzlKpdZ9fcqyg/RhZ2jWNJTe0rqd6HV1GW3f+q3oOPAQdHxEeyWrvV2Ieyy+ZcyopzB2Bv4CkRsUOWrWMdL6IEnR9Qlt3lwOOBgynLxuzMvHacUo8HTgFeB7y7pv/BlC+9U6rX9UTKOiApXy5XAQ8DHgm8gbICX9FvYhHxXMrn+8/V8NdS5vXjquHf12/YHqdRvmB/T1mnJGX9cDxlN2HnuOLLq3HuBzyJ8jnvfF7qPjcDqY4zewrlh+5lfZp9tWpzLmWZuqFr+KbL74eraf2E8p6tBzyzej1PAV7ZNe6/pSzn21PWZ9+krNO3oSxbZ1M+ZxNZzodepzV5LT0+Ajynej0LKD+GXkdZ9p7Z3TAiZlPWQxsCF1De47+lfJ7mUd7nTtsnV+PbsBrmPyk/BvcDfhQRL8zMc2rqeSuwV1XPD6rXMQqnAO+lzK9nUj4vUD4jH6xez7cpwWkWZf39jxHx/MzsHGfaWe7fS/nhN79r/Au7/v8MZaPOBZRQuRFlfXNaRDwmM/+10zAiNqf8kHoY5Xvlq5R16HaUefYpSjjutB90GR+01uFMNCXO1Ad9tuRRwtV91WObqtu23J+sP9RnfAt7x8f9Ww5W+uVC+UWWwPE93T/E/V8gvb8A1wY26Xo+j/5b8hL4Mg/8Vb8d5ZfHcqpfs13jrdvysR4l2NxE1y+qqt8SBt+S94Wqnn9rOI+2oXzB/hl4bE+/46txnlg3HygfxvW7uj+iet03U76Yt+zqtz5l69mNwBpd3bvn+0d7pjOb8mV+M/Cwru5HVu3P6RnXptV7lnRtwe2Zxnt7pvGczrh6us+tuv9nzXzpLBNv7rNMfB5Yvav7DsA9wC/6LLvzhvx8vbwa/rNd3Tpbfvasad95Tff09geOrvq9vaf7ltRv9Xk2ZevcZ8Z7TZRlfxllBb9mn/ZndHX7j6rbvjXT3YAHft4682JOzXvwpJrhNx7wvT2gGselwLpd3dehbNVMerbY07U1qME87MyTy6vXMg94P+WHzrWUrTdvrBluYTXcz+te05DL7/Y141mNEggS+Ieu7s+vun28Zpi1gIdOdDlnyHVa09fSM++uAWZ1dV+DEk4S+Pue13hV3XJQ9d+6Zxy/oWxlekZPuy2q+XwdD9zy1JlHtwM7NXztndcyd5x2p1Xt3tfVbb0+y9NWlMMQflnTL4GFDefFWpQf/yt44PdEZ2/Em2uGWYcHbnUcZhkfs9ZhHyMd2Ux60LU5tHp8kPIL756q+zFdbbetul1PzZdK1WYh/UPej2rar1ktRIu6uq3O/btztxjgNXQWljk1r+0eYLsxhnnvgO/T4VX73Xu6L2HwkHdONY5DG86jd9MnWFO+UP9M2WTevQJaSP8g8f2q32tq+p1c9dumZr7fQtcXQ1f/+VX/V3V1+zXlB8Jja9q/tmp/Us00ltAVvrr6Xw0s6+l2WbXsrF/TfnVKaLmkZpm4na5A2tXv/Kr/hL/8at7rXbq6db58v1TTfm7V7/SafttV/c5uMP2fA7/r6Vb7moCPVt337+n+xd5ln/tD3pi76Kq2nc/anK5unZD36GHe12oc3+1XA+XQhgS+32dZ3bbBdDrzpN/jTOp3oy+kTxAedvkdo8YnV9N6T81yVvuDfJBlYoDhhlqnNX0tPfPu4JphOrs239TVbf+q29cHmOa+1PyI7er/5qr/3jXL9UoheoDpdV7L3HHafZiajSBjtP9E1X5WT/ehghNlL0FSTlTqdOuEvEMGGH7YdXTjWsd7uLu2bCKF+7/Mfwh8ITNPr2n7s1x50/sgFvV2yMwVEbGUElY6Hkv5tfKTzBzmAOlu12TmVTXdF1Je807dHSPi8ZTjHXan7I78m57htpxALf12f4/nydXf7/f2yMybI+IySr2PpZzZ1m2l95z7DzpfXNOvs1tvK0qw6nZpZt5WM8xCyq6enYBTIuKhlF0n12bmr2rad17HTjX9Ls/6MxR/D+zSeVLtinoSZSXxloioGYS7Kbs2ev06M+sOL/h99Xd9ynFwExIRj6R8eV6ZmT/u6nUu5TiiF0bExvnAXa8ddfOtU1/3Z4UoL/4VlDDypKr/6l1Nlg9Y8mcou57+mRLCiIiNKbs/f5mZF3S1PYvyxfe1iDibctzqhZn52wGndQblC+QnEXEWZTfXhZn5hwGHh/K5uI/6XTnnU7Zi1i1jwzolM+d2nkTEwyl7PI4D9omIOZl5ac1wl/R2GHb5rS6rcQRlV9ojKFtOunWvn86nfJ7fWe2KPIey+7bfZ2wYw67Tmr6WboN+Np5a/T13gHI665Zt+lxG5lHV38dR3sduK83fEap9f6sTWd5MqXtTyla3blvS4Gz2iJhFOfRnT8qu34fUjK/jG5Q9bZ+OiOdQdm1fSNkL8tc6J7iOHrkHfcjLzNo50Mf1Q06m37Ev9/DAL6X1q7/jHUc0iH5nMHZew1+Pn4iIp1ICyBqUzdTfoGwlu49ywsi+lN1aw+qEq60aDtep8bo+/Tvd1+/tkZm31rTvHOMzVr81a/oN+l4OXS9jLyPd17PcgLIC3IT7f6AMaqxpwAOXxYl4HaXG+d0dM/OeiDidEqjmUo7R67VSjdVwdfUdA7yF8r5+h/K5ubPqN5eyu39cmfm7iPgO8JyI2L4KbHMpy/xne9peEhG7UbYyv5jq+KmIuJKya2nMswEz8z8jYh/Ke/AaSrAkIhYDR2bmdwcoeT3gpsxcKcRW79UyyhfgpMhydvQZEfEQytmlR1MOLehVt75svPxWZ/L+lLJF9xLgVMohJPdQPktvpmv9lJl/rtZp76Mcr9WpbVlEHE/Zxdr3uMkBDbVOa/paetR9fus+u02+RzrXpHvJOO3Wrek27PfhIDpng9/Y6RARL6TsbbuLsjX7t5S9E/dRflQ+gwbfUxHxCMo82ICycWcB5bvhXsoellfxwOXq6oj4e8qWzOdSfqwB/D4iPpaZn6ieT2QdPXIP+pDXUONfbQ11PsQT2WrW8fA+3Ter/nYHnaMov2D2yMyF3Y0j4khKyJuIH1G+0PakXDNqUJ0aN6OcBdpr8552k2XQ9/LWnu69RlFvZ9jLMvPJY7acAhGxJiUgARwdEUf3afo66kPeoNPZlHI24hWUYxxv6+l/QMNRfoay4n4d5czogylfJqf2Nqy2Tu4TEWsDO1fDHQacGRE3ZuZ5Y00oy6U2vh0R61BODtqHclbstyJip8z8xTi13gpsGBFr9oaV6jIUGzPYCWET9ZPq79/X9ezeutFlmOX3YEooel+ufCmXXSjBqHfafwBeW23t3YFyAP8bKSdYrUaz9VCdYddpjV/LEJp8j3Tmx76Z+Y2G05mU78OIWI2yhwbuX8agnLCwHJidmb/sGeazlJDXxOGUkPvqXPlyLgdQQt4DVNN9WfU5exJli/ZhwHERcXtmfoFpto5+0N7xYpr6FeUD+sSI2GK8xuOYFRHb1nSfU/3tPiPukZQtAwtr2jf94NQ5m/JrdZeIeNZYDasvzo5OjXNq2q1P2crYOS19Mj252hXbq1PXZQBV0PgtsGVEPKqm/R7V37pdWwPJzL9QAu/jI2LDYcczgM5uraZb9/albEW6knJwet3jd8CjI2Iiy9YjKOuvBTUBb6uqfxPfouzmeXWUO3M8BvhyZt7cb4DMvDszL8rM91ACJzT4QZSZt2fm97NcdP1DlF1P/zjAoJdRXvvuNf12p8yzoZexBjq7CAf+Hhly+X1k9ferNf3GXIay+N/M/CTlTFAoZ412DLucD7tOG/q1NHBx9XeQZanTdrcRTXsU5lJ2nV5HOZyh45GUXaO9AW81yhnlde6j/7ydyHJ1T2Yuzsx/p5wIBdVyNYF19Fi1Ds2QN41Ux4scT9mqdkLPyoGIWCsiNhlwdKsD/159ADrDb0f5MrqHcp2mjiWULQNP7Jnea6nfDdNI9SXc+RI8qzqeYSXVLpbuY7hOpxy8elh1nFe3D1BOZT99yOMkm1iPsgXgr6pLFLyC8qvtv7p6nUTZVP/RiFi9q/3G3P+L/6QJ1nMMJRCcVIXdB4iIDapjkSaicymAWQ2HO6T6+57MPLjuQQk03W2HsaT6+/Se93ldyi7ERnspMvM+yvWvNuX++XNCb7uI2C3qb1PV2dp7x1jTiYg9q92cQw1f6dR3dHTdVqz6/8PV0y8MMJ6hVe95Z6vTwoaDN11+l1R/5/S024lyNnvv8E/o8wO37j0eajmfwDptSfV3Tk+72tcypG9W03lB3RbtiOjewvd1yg/TN0bE3nUji4hdYhXcvi4i1oiI11EuO5XA/8vMu7qaLAEe1b0BpNpS+17K1to6f6LcTaPOkurvnJ46nkPZ4tpb399Xx6P2qluuhllHj1Xr0NxdO/28j7IL5/nA/0XEtygHw29NuTTEEfQc69THz6vxLI6IBZSg8jLK8Rpv7zlQ/FhKmPtRRHyZElxmU34dnU059mhCMrNzDM+ngP+OiMsp1zbr3AJoF+4/WLUzzJKIeAvlQ39pVduNlF9Zu1C2fL5jorUN4ALK9d3+gXKgbec6easB/9xzMsPHKL+g9wV+FhHnUK5P9RJKgPhIZv5oIsVk5kkRsTPlumq/rY4nu4ZynavtKFtzTqZcQ25YV1KO6Xl5RCyvxp/AaZnZe2IK8NcfEc+izMOv1bWpfAn4OLB/RByWmTc1LS4zr4+IL1Eu1XJ51zK+F2Xr7uWULb1NfJ4S5rcE/qfnpJGOtwLPjnKPyd9RLiPyeMo8v5kSFMfyH8C21fBLKLufdqbsTrya8t6MKTPPjIh9Kde9/N+I+Bpl3uxHmf9fzswzxhtPAzvGAw/K37Sq9zGUef32JiMbYvk9lbLeOzYi9qCcwf4oym7u/6R8Frs9CzgmIi6irCNuoBw7ty9la0n3NUIbL+ddr6PxOm2I19JYZi6PiJdQjjE7M8q1Ri+mnEz3OMou5jWqtisi4kWUY1q/Xb1nl1MCy9aU6/Y9grLOG+QHyKD26wri61BC9m7VdG6lrFfP6hnm45QfXpdFxFcpGwCeRgl436R8Z/b6HmXefpNywt09wAXVyVTHU85O/ko1vmuBJ1AOv/gyK8+LAylh+HzKZWduplyL8fmUEymO7TQcch09Vq3Dm8ipuTP5AfXXyevTdtuq/fwx2izsHR/jnJ5Pn8uQUD6Ab6IcFNq5mv2vKV8gj+xqN4/+l1BZSDl49XTKSu4uyi6cla6bVA2zD2VFcBtll/GCakGcS80p7/1qH+C93JpyweFLq+msoAS3H1AOoq+7xMezq3pupnyYfkO5MGjd6ekrzYeufvPpcxmJuveSB96N4nGUX703U1Z2FwLP6TOdvwHeRTle7M7qPf0RcEDTZWuc17MPZTfjDZSwcH21zPwbK19XsO/p+f3eF8oK/nuUle59dctaT/sP0nP5oTHansj9v9bpt5yNVT8lPH+Q+6/z9XvKD4KN6t43BrhcBmWrbFJz/beuZfFkygVUb6V8Nq+kXMJhmwGWqZdSLs3ya8pn+8/VcvJBuq6BOcD7txrlC2RRtTzeQflieCPj3DWhwTQ686T3cSflEIljqbnU01jL7ASW3x0oJ4TdUL3niylbW7al5/ND+awewwPvhLKE8oN1pbsMNV3Oa4ZvtE5r8lrGm3djLdOU4HQ85Zp5yylbin4CvLum7aaUrcBXVMvSX6pl9Gzgn3jgNT/nNX2Pal5L53Ev5TPwW8oPwzcBG46zTF5evW/LKJ/Xv+tXU/W6zqScPHdv73sF7Eo56fBm7l9P71f3vlI2mnyGciWHm7j/TlQnA08YwTI+Zq3DPqIauVokIhI4PzPnTHUtM1n1S/Mqei4hoXaqDm34DWX3y+ZZf7kZSZoxPCZPkooXU3alnGrAk9QGUx7yImL3iPhGRFwbERkRcwcY5u8i4vyIuLMa7j3VAZiS1EhEvDMiPkLZhXw795+8IEkz2nQ48WJdynEAp1JzTapeEfEwyoUQL6AcS/EYyn7+2ykHNUtSE0dTjqP6BXBEjnPAvSTNFNPqmLyI+AvlHnzzx2jzespBrg/PzDurbkdRLia6VU6nFyRJkjRFpnx37RB2AX7YCXiV71DOJN12SiqSJEmaZqbD7tqmNgN6b+a9tKvfVd09IuIQqouurrPOOjs/9rGPnfQCJUmSJmrx4sXLMnPQmyCsZCaGPFj5nnnRpzuZeSLVBUpnz56dixYtmuTSJEmSJi4iJnSM8EzcXXs9K98AftPq71IkSZI0I0Pej4HdIuJvurrtBfyR++9FJ0mS9KA25SEvItaNiB0jYseqnlnV81lV/6Mj4ntdg5xJue3K/OpG1C8C3km5lZJn1kqSJDENQh4wG7isejwEeF/1//ur/ptTbgIMQGbeStlytwXl3oSfplwf75hVV7IkSdL0NuUnXmTmQu4/caKu/9yabv8D7D55VUmSJM1s02FLniRJkkbMkCdJktRChjxJkqQWMuRJkiS1kCFPkiSphQx5kiRJLWTIkyRJaiFDniRJUgsZ8iRJklrIkCdJktRChjxJkqQWMuRJkiS1kCFPkiSphQx5kiRJLWTIkyRJaiFDniRJUgsZ8iRJklrIkCdJktRChjxJkqQWMuRJkiS1kCFPkiSphQx5kiRJLWTIkyRJaiFDniRJUgsZ8iRJklrIkCdJktRChjxJkqQWMuRJkiS1kCFPkiSphQx5kiRJLWTIkyRJaiFDniRJUgsZ8iRJklrIkCdJktRChjxJkqQWMuRJkiS1kCFPkiSphQx5kiRJLWTIkyRJaiFDniRJUgsZ8iRJklrIkCdJktRChjxJkqQWMuRJkiS1kCFPkiSphQx5kiRJLWTIkyRJaiFDniRJUgsZ8iRJklrIkCdJktRChjxJkqQWMuRJkiS1kCFPkiSphQx5kiRJLWTIkyRJaiFDniRJUgsZ8iRJklrIkCdJktRChjxJkqQWMuRJkiS1kCFPkiSphQx5kiRJLWTIkyRJaiFDniRJUgsZ8iRJklrIkCdJktRChjxJkqQWMuRJkiS1kCFPkiSphQx5kiRJLWTIkyRJaiFDniRJUgsZ8iRJklrIkCdJktRChjxJkqQWMuRJkiS1kCFPkiSphQx5kiRJLWTIkyRJaiFDniRJUgsZ8iRJklrIkCdJktRChjxJkqQWMuRJkiS1kCFPkiSphQx5kiRJLWTIkyRJaiFDniRJUgsZ8iRJklrIkCdJktRChjxJkqQWMuRJkiS1kCFPkiSphQx5kiRJLWTIkyRJaiFDniRJUgsZ8iRJklpoWoS8iHhDRFwVEXdFxOKI2G2c9gdGxOURcUdEXB8Rp0fEZquqXkmSpOluykNeRLwMOA74ELATcBFwbkTM6tP+acBpwCnA44H9gB2AM1ZJwZIkSTPAlIc84HBgfmZ+LjN/mZmHAdcBr+/TfhfgD5n58cy8KjMvBj4J/MMqqleSJGnam9KQFxFrATsDC3p6LQB27TPYhcDmEfH8KDYGXg6cM3mVSpIkzSxTvSVvY2B1YGlP96VA7TF2mflj4ADK7tnlwI1AAK+avDIlSZJmlqkOeR3Z8zxqupUeETsAnwA+QNkK+FxKIPxsn/aHRMSiiFh04403jq5iSZKkaWyqQ94y4F5W3mq3KStv3es4ErgkMz+amT/PzO8AbwBeGRFb9zbOzBMzc3Zmzt5kk01GWbskSdK0NaUhLzOXA4uBvXp67UU5y7bO31KCYbfO8xhddZIkSTPXGlNdAHAMcFpEXEI5qeJQYAvgBICIOBUgMw+q2n8T+FxEvB74DrA5cCxwaWZes4prlyRJmpamPORl5lkRsRFwFCWwXQHsnZlXV01m9bSfHxEPBd4E/AdwK/AD4O2rrmpJkqTpLTJrz29opdmzZ+eiRYumugxJkqRxRcTizJw97PBTfeKFJEmSJoEhT5IkqYUMeZIkSS1kyJMkSWohQ54kSVILGfIkSZJayJAnSZLUQoY8SZKkFjLkSZIktZAhT5IkqYUMeZIkSS1kyJMkSWohQ54kSVILGfIkSZJayJAnSZLUQoY8SZKkFjLkSZIktZAhT5IkqYUMeZIkSS1kyJMkSWohQ54kSVILGfIkSZJayJAnSZLUQoY8SZKkFjLkSZIktZAhT5IkqYUMeZIkSS1kyJMkSWohQ54kSVILGfIkSZJayJAnSZLUQoY8SZKkFjLkSZIktZAhT5IkqYUMeZIkSS1kyJMkSWohQ54kSVILGfIkSZJayJAnSZLUQgOFvIh4eES8MCKeHxHrjdHuGRHxntGVJ0mSpGGMG/Ii4k3AEuBs4GvAHyLi8D7N5wDvHVVxkiRJGs6YIS8i5gCfqNqdB5wLrAF8NCLOiAh390qSJE1Da4zT/y3APcCzMvOHABGxDXAG8PLyNF6RmTm5ZUqSJKmJ8bbEPRX4RifgAWTm1cAzga9Sgt4pk1eeJEmShjFeyNsAuLK3Y2YupwS8s4B/ioiTJqE2SZIkDWm83bVLgQ3remTmfRHxCmB14FURsQK4bsT1SZIkaQjjhbxfA0/v17MKegdQdt0eDCwbYW2SJEka0ni7axcAO0TEk/o1yMx7gZcA/w1sMsLaJEmSNKTxtuR9FdgReBLws36NMnNFRLwQ+Cyw7ciqkyRJ0lDGDHmZ+RvggEFGVJ2M8epRFCVJkqSJ8WLGkiRJLWTIkyRJaiFDniRJUgsZ8iRJklrIkCdJktRChjxJkqQWMuRJkiS10NAhLyKeGBEHjbIYSZIkjcZEtuS9EDh5VIVIkiRpdNxdK0mS1EKGPEmSpBYy5EmSJLXQRELercA1oypEkiRJozN0yMvMYzNzu1EWI0mSpNFwd60kSVILGfIkSZJayJAnSZLUQoY8SZKkFjLkSZIktZAhT5IkqYUGDnkRsXtEzBqnzdYRsfvEy5IkSdJENNmS9wNg7jhtDqraSZIkaQo1CXkxYJscshZJkiSNyDKYvfMAACAASURBVKiPyZsF3DbicUqSJKmhNcbqGRHv6ek0J6J2g97qlID3cuBHoylNkiRJwxoz5AHzuv5PYE716Oda4J0TqkiSJEkTNl7I26P6G8D3gfnAKTXt7gX+BFyZmfeNrDpJkiQNZcyQl5nnd/6PiFOAr3V3kyRJ0vQ03pa8v8rMV09mIZIkSRqdgUNet4hYB1ifcsLFSjLzmokUJUmSpIlpFPIi4pXAO4DHjdEsm45XkiRJozVwGIuIucBJlJMsfgj8HrhncsqSJEnSRDTZ4vY24Gbg6Zn5y0mqR5IkSSPQ5I4XjwTONuBJkiRNf01C3k3AXZNViCRJkkanScj7FuW2ZrX3NZMkSdL00STkHQmsDZwQEetOUj2SJEkagSYnXnwFuAM4GDgwIn4N3FLTLjNzz1EUJ0mSpOE0CXlzuv5fB9ixT7scuhpJkiSNRJPbmjXZtStJkqQpZHCTJElqIUOeJElSCzUKeRGxWkQcFhEXR8StEXFPV7+dIuL4iHj06MuUJElSEwOHvIhYC/gucCywPXAb0H3NvKuA1wCvGGWBkiRJaq7JlrwjgD2A9wEPBz7f3TMzbwEuAJ4zsuokSZI0lCYh7xXAhZn5/sy8j/pLpVwFzBpJZZIkSRpak5C3HXDxOG1uAjYcvhxJkiSNQpOQdyew/jhtZlF/FwxJkiStQk1C3uXAs6sTMFYSEetRjse7pGkREfGGiLgqIu6KiMURsds47deKiPdXw9wdEddExL80na4kSVJbNQl5nwO2Bs6IiId194iI9YH5wAbACU0KiIiXAccBHwJ2Ai4Czo2IsY7t+yLwXOAQ4DHAS4CfN5muJElSmzW5rdkXI+JZwKuBFwA3A0TEIuDxwNrApzPznIY1HA7Mz8zPVc8Pi4jnAq8HjuxtHBHPBp4FbJ+Zy6rOSxpOU5IkqdUaXQw5M19LuRbeL4BNKNfJezLwG+C1mXlYk/FVu353Bhb09FoA7NpnsP2AnwKHR8QfIuLXEfGJiFi3ybQlSZLabOAteR2ZOR+YHxEPoeyevTUzbx9y+hsDqwNLe7ovpWytq/MI4OnA3cD+lJNBPglsAbx4yDokSZJapXHI68jMOyln3I5C7zX3oqZbx2pVvwMz81aAiHgT8J2IeHhmPiAwRsQhlGP3mDXLS/hJkqQHh0a7ayfBMuBeYLOe7puy8ta9juuAazsBr/LL6u9KKS4zT8zM2Zk5e5NNNplovZIkSTNCo5AXEc+IiG9FxA0RsSIi7q153DPo+DJzObAY2Kun116Us2zrXAhs0XMM3qOrv1cPOm1JkqQ2G3h3bUQ8D/ga5Ri6a4ArgYED3RiOAU6LiEsoAe5QyvF1J1TTPRUgMw+q2p8J/CtwckTMoxyTdxxwdmbeMIJ6JEmSZrwmx+TNA1YAz8vM3rNhh5aZZ0XERsBRwObAFcDemdnZKjerp/1fqku5fJJylu3NlPD5zlHVJEmSNNM1CXlPAL40yoDXkZnHA8f36TenptuVwLNHXYckSVJbNDkm7y/ATZNViCRJkkanScj7HrDLZBUiSZKk0WkS8t4BbB8RR0VETFZBkiRJmrgmx+S9F/hf4H3AayLicuCWmnZZ3f5MkiRJU6RJyJvb9f+21aNOAoY8SZKkKdQk5G03aVVIkiRppAYOeV3XrZMkSdI0N9X3rpUkSdIkaLK7FoCIeCpwMLAT5ZZit1LuP3tyZva736wkSZJWoUYhLyL+DTgS6L2Eyo6UM27/PTPfNariJEmSNJyBd9dGxEuAdwHXULbkPQJ4SPX34Kr7OyLipZNQpyRJkhpockzeYcBS4CmZeVJmLsnMu6u/JwFPAW4E3jgZhUqSJGlwTULek4CzM3NZXc+q+1cou24lSZI0hZqEvDWAO8ZpcwdDnMwhSZKk0WoS8n4D7BMRtcNU3fcGfjuKwiRJkjS8JiHvi8DjgK9HxKO6e0TE9sDZwA7AmaMrT5IkScNosmv1GOC5wPOAf4yIPwLXAZsBW1IC44+qdpIkSZpCA2/Jy8zlwF7Au4GrgK0oZ9RuXT1/N7Bn1U6SJElTqNFJEpm5AjgaODoi1gXWA27NzL9MRnGSJEkaztBnwlbBznAnSZI0DQ1z79p1gRdS7l27HuXetZcB/+UWPUmSpOmh6b1rXwKcAKzPA+9fm8CxEfHPmXn2COuTJEnSEAYOeRGxF+UyKvcBpwILgespZ9fuARwIfDEibsnM80ZfqiRJkgbVZEvee4C7gd0y89KefqdExKeAC6p2hjxJkqQp1ORiyDsBZ9UEPAAycxHwZeDJoyhMkiRJw2sS8u6mXPx4LH+s2kmSJGkKNQl5PwSePk6bp1F22UqSJGkKNQl57wD+LiI+HBHrdPeIiHUi4iPAE4B3jrJASZIkNdfkxIt3AD8HjgAOiYhLgaXAwynH4a1H2Yr3jojuq6uQmfna0ZQrSZKkQTQJeXO7/l8feGZNm2dUj24JGPIkSZJWoSYhb7tJq0KSJEkjNXDIy8yrJ7MQSZIkjU6TEy8kSZI0QzS6dy1ARKwGbAlsBaxZ1yYzvYyKJEnSFGoU8iLiCOBtwMbjNF196IokSZI0YQOHvIiYR7kv7Z+AU4BrgXsmpyxJkiRNRJMtea8FfgfsnJm3TlI9kiRJGoEmJ15sBHzDgCdJkjT9NQl5vwE2mKxCJEmSNDpNQt7xwD4RsdlkFSNJkqTRaHIx5BMi4tHAhRHxfuBSoHbXbWZeM6L6JEmSNISm18n7GeUetieN0SaHGK8kSZJGqMklVA4GPku5bMpC4I94CRVJkqRpqckWt7cCNwC7ZuZVk1SPJEmSRqDJiRfbAmcb8CRJkqa/JiHvWvrcq1aSJEnTS5OQdyqwd0Q8dLKKkSRJ0mg0CXkfAi4BzouIOYY9SZKk6avJiRd3V38D+B5ARNS1y8z0EiqSJElTqEkY+yHlGniSJEma5prc8WLOJNYhSZKkEWpyTJ4kSZJmiKGOnYuINYHHAutT7l/7y8xcMcrCJEmSNLxGW/Ii4mERcQJwC3A55fZmlwG3RMQJEbH+6EuUJElSU03uXfsw4ELg8cBtlBMxrgM2B3YEDgGeHhG7ZuafJ6FWSZIkDajJlrwjKQHvM8A2mTknMw+oTsjYBvg0sEPVTpIkSVOoSch7EXBxZr4xM2/p7pGZt2bmYcCPgf1HWaAkSZKaaxLyZlGOwRvL+cDWQ1cjSZKkkWgS8u4ANh2nzSZVO0mSJE2hJiHvp8BLIuJRdT0jYnvgpVU7SZIkTaEm18n7KLAA+GlEfBL4AeXs2s2AOcBhwLrAx0ZcoyRJkhpqcluz70XEG4DjgHdVj44AVgBvyszzRluiJEmSmmp0x4vM/GxEnAu8EtgJWI9yx4vLgNMz8+rRlyhJkqSmGt/WLDOvAT44CbVIkiRpRBrd1kySJEkzw5ghr7pX7Q0RcWlErDlGu7UiYnFEXB8R646+TEmSJDUx3pa8ucDGwBszc0W/Rpm5HHgj5Tp6rx5ZdZIkSRrKeCHv+cAVmfnj8UaUmRcDPwP2G0VhkiRJGt54Ie+JwI8ajO/HwBOGL0eSJEmjMF7I2wD4U4Px/QlYf/hyJEmSNArjhby/UILeoDYAbh++HEmSJI3CeCHvd8CuDca3azWMJEmSptB4Ie884EkR8dzxRhQRzwZ2BL47isIkSZI0vPFC3qeA5cDpEbFnv0YR8UzgTOCuahhJkiRNoTFva5aZf4iIw4ATgQURcTHwPeAPQAJbAXsCuwABHJyZ105uyZIkSRrPuPeuzczPR8QdwCcpYe6pPU0CuAn4l8w8c/QlSpIkqalxQx5AZp4ZEd8AXgw8HdicEu7+SLmO3tmZ+ZdJq1KSJEmNDBTyAKoQN796SJIkaRob78QLSZIkzUCGPEmSpBYy5EmSJLWQIU+SJKmFDHmSJEktZMiTJElqIUOeJElSCxnyJEmSWqjvxZAj4ndDjjMzc/shh5UkSdIIjHXHi9WAHGKcMWQtkiRJGpG+IS8zt12FdUiSJGmEPCZPkiSphQx5kiRJLTTWMXm1ImJt4CnAlsDadW0y89QJ1iVJkqQJaBTyIuI1wEeADfo1oZysYciTJEmaQgPvro2I5wKfB64D3kYJdF8H3g18t3r+FeA1oy9TkiRJTTQ5Ju+twJ+AXTPz41W3yzPzw5n5XOB1wIuA3464RkmSJDXUJOQ9GfhmZt5WN3xmfgG4kLJlT5IkSVOoSchbh7KrtuMu4GE9bRYB/zDRoiRJkjQxTULe9cAmXc+vAx7T02Y9YPWJFiVJkqSJaRLy/pcHhrofAntGxG4AEfEE4KVVu0Yi4g0RcVVE3BURizvjHGC4p0fEPRFxRdNpSpIktVmTkHcu8LSI2KJ6/hHgXmBhRNwI/Ax4KPBvTQqIiJcBxwEfAnYCLgLOjYhZ4wy3AeVSLd9rMj1JkqQHgyYh77OUCyAvA8jMXwB7UsLfMmAB8I+ZeU7DGg4H5mfm5zLzl5l5GGVX8OvHGe4LwCnAjxtOT5IkqfUGvhhyZq4AlvZ0uxjYZ9iJR8RawM7Ax3p6LQB2HWO4NwCbAS8B/nXY6UuSJLXVVN+7dmPKiRpLe7ovpYS4lUTE3wHvBV6RmfeON4GIOCQiFkXEohtvvHGi9UqSJM0Iw9y7dlvglZTj59YDbgUuA07PzKuGrCN7J1PTrXPf3C8Bbxt0Wpl5InAiwOzZs1capyRJUhs1vXftW4EPAmtSgljHfsBREXFkZh7TYJTLKCdv9G6125SVt+4BbA7sAJwcESdX3VYrpcU9wN6ZuaDB9CVJklqpyb1rDwA+CtwOvB/YA3hc9ff9VfePVmfLDiQzlwOLgb16eu1FOcu217XA3wE7dj1OAH5T/V83jCRJ0oNOky15bwVuBp6cmVd3db8SOD8iTqEEtrcBZzUY7zHAaRFxCeW2aIcCW1DCGxFxKkBmHlSd/PGAa+JFxA3A3ZnptfIkSZIqTULeDsApPQHvrzLzqoj4MnBQkwIy86yI2Ag4irI79grKbtfOdMa8Xp4kSZJW1iTk3QbcMk6bW4A/Ny0iM48Hju/Tb844w84D5jWdpiRJUps1uYTKAuA5/XpGRADPrtpJkiRpCjUJeW8HNoiIL0bENt09qluQnQmsX7WTJEnSFGqyu/YMyu7YlwL7R8Q1lMucPJxy3NzqwM+BM8tGvb/KzNxzNOVKkiRpEE1C3pye4R5RPbo9qWY4L0AsSZK0ijW5d+1U3wJNkiRJAzK4SZIktZAhT5IkqYX67q6NiN2rfy/JzLu6no8rMy+YcGWSJEka2ljH5C2knDTxOOD/up4PYvUJVSVJkqQJGSvkvZ8S6pb1PJckSdI01zfkVbcL6/tckiRJ05cnXkiSJLXQwCEvIraPiIMiYqM+/Teu+vdeIFmSJEmrWJMtee8E/gP4c5/+twIfA46YaFGSJEmamCYhbw5wXmauqOtZdf8u8MwR1CVJkqQJaBLytgSWjNPmGmCLoauRJEnSSDQJecuBh43T5qF4mRVJkqQp1yTkXQE8LyLWrOsZEWsB+wC/GEVhkiRJGl6TkHc6MAv4ckRs1t2jev5lYGvg1NGVJ0mSpGGMdceLXicC+wP7AntFxM+BaynH6j0R+FvgPOCEURcpSZKkZgbekpeZ9wF7Ax8GVgBPpYS+p1KO1/sQ8LyqnSRJkqZQky15ncukvCsijgIeC6wP3AL8ynAnSZI0fTQKeR1VoPMEC0mSpGnKe9dKkiS1UKMteRHxKODNwN8DGwCr1zTLzNx+BLVJkiRpSAOHvIjYhXL27EOAe4Cl1d+Vmo6mNEmSJA2ryZa8o4G1gUOBkzKzLuBJkiRpGmgS8p4CnJ2ZJ05WMZIkSRqNpveuvWayCpEkSdLoNAl5FwE7TVYhkiRJGp0mIe9dwK4R8crJKkaSJEmj0eSYvH2B7wPzI+JgYDHlbhe9MjM/MIriJEmSNJwmIW9e1/+7VY86CRjyJEmSplCTkLfHpFUhSZKkkRo45GXm+ZNZiCRJkkbHe9dKkiS1kCFPkiSphfruro2I+4D7gB0y8/+q5znAODMzmxzrJ0mSpBEbK4xdQAl1d/Q8lyRJ0jTXN+Rl5pyxnkuSJGn6GviYvIjYPSJ2nMxiJEmSNBpNTrz4AXDIZBUiSZKk0WkS8pYBd05WIZIkSRqdJiFvIbDrJNUhSZKkEWoS8o4CHhMRH4iINSerIEmSJE1ck+vZHQlcAbwLeG1E/Ay4npUvq5KZ+doR1SdJkqQhNAl5c7v+36x61EnAkCdJkjSFmoS87SatCkmSJI3UwCEvM6+ezEIkSZI0OgOFvIiYBTyFsiv2p5n5+0mtSpIkSRMybsiLiI8BbwGi6pQR8fHMPGJSK5MkSdLQxryESkQcCBxOCXi/Aq6s/j88Ig6Y/PIkSZI0jPGuk/da4B7gWZn5+MzcAXgOcB+eQStJkjRtjRfyngh8LTN/0OmQmecBXwd2nMzCJEmSNLzxQt4GlF20vX4FrD/6ciRJkjQK44W81YAVNd1XcP+JGJIkSZpmBrl3be9tyyRJkjTNDXKdvHkRMa+uR0TcW9M5M7PJnTQkSZI0YoOEsaa7Zd2NK0mSNMXGDHmZOcjuXEmSJE0zhjhJkqQWMuRJkiS1kCFPkiSphQx5kiRJLWTIkyRJaiFDniRJUgsZ8iRJklrIkCdJktRChjxJkqQWMuRJkiS1kCFPkiSphQx5kiRJLWTIkyRJaiFDniRJUgsZ8iRJklrIkCdJktRChjxJkqQWMuRJkiS1kCFPkiSphQx5kiRJLWTIkyRJaiFDniRJUgsZ8iRJklrIkCdJktRChjxJkqQWMuRJkiS1kCFPkiSphQx5kiRJLWTIkyRJaiFDniRJUgsZ8iRJklrIkCdJktRChjxJkqQWMuRJkiS1kCFPkiSphQx5kiRJLWTIkyRJaiFDniRJUgtNi5AXEW+IiKsi4q6IWBwRu43R9kURsSAiboyI2yLiJxHxglVZryRJ0nQ35SEvIl4GHAd8CNgJuAg4NyJm9RnkGcD3gedV7c8B/musYChJkvRgE5k5tQVE/AT4eWa+rqvbr4GzM/PIAcdxCfDDzHzrWO1mz56dixYtmlC9kiRJq0JELM7M2cMOP6Vb8iJiLWBnYEFPrwXArg1G9VDg5lHVJUmSNNNN9e7ajYHVgaU93ZcCmw0ygoh4I7AVcFqf/odExKKIWHTjjTdOpFZJkqQZY6pDXkfvPuOo6baSiNgf+Cjwisy8unbEmSdm5uzMnL3JJptMvFJJkqQZYKpD3jLgXlbearcpK2/de4Aq4J0GHJSZ35ic8iRJkmamKQ15mbkcWAzs1dNrL8pZtrUi4qXA6cDczDx78iqUJEmamdaY6gKAY4DTqjNkLwQOBbYATgCIiFMBMvOg6vnLKVvw3gZcEBGdrYDLM/OmVVy7JEnStDTlIS8zz4qIjYCjgM2BK4C9u46x671e3qGUuo+tHh3nA3Mmt1pJkqSZYcpDHkBmHg8c36ffnLGeS5IkaWVTfeKFJEmSJoEhT5IkqYUMeZIkSS1kyJMkSWohQ54kSVILGfIkSZJayJAnSZLUQoY8SZKkFjLkSZIktZAhT5IkqYUMeZIkSS1kyJMkSWohQ54kSVILGfIkSZJayJAnSZLUQoY8SZKkFjLkSZIktZAhT5IkqYUMeZIkSS1kyJMkSWohQ54kSVILGfIkSZJayJAnSZLUQoY8SZKkFjLkSZIktZAhT5IkqYUMeZIkSS1kyJMkSWohQ54kSVILGfIkSZJayJAnSZLUQoY8SZKkFjLkSZIktZAhT5IkqYUMeZIkSS1kyJMkSWohQ54kSVILGfIkSZJayJAnSZLUQoY8SZKkFjLkSZIktZAhT5IkqYUMeZIkSS1kyJMkSWohQ54kSVILGfIkSZJayJAnSZLUQoY8SZKkFjLkSZIktZAhT5IkqYUMeZIkSS1kyJMkSWohQ54kSVILGfIkSZJayJAnSZLUQoY8SZKkFjLkSZIktZAhT5IkqYUMeZIkSS1kyJMkSWohQ54kSVILGfIkSZJayJAnSZLUQoY8SZKkFjLkSZIktZAhT5IkqYUMeZIkSS1kyJMkSWohQ54kSVILGfIkSZJayJAnSZLUQoY8SZKkFjLkSZIktZAhT5IkqYUMeZIkSS1kyJMkSWohQ54kSVILGfIkSZJayJAnSZLUQoY8SZKkFjLkSZIktZAhT5IkqYUMeZIkSS1kyJMkSWohQ54kSVILGfIkSZJayJAnSZLUQoY8SZKkFjLkSZIktZAhT5IkqYUMeZIkSS1kyJMkSWohQ54kSVILGfIkSZJayJAnSZLUQoY8SZKkFjLkSZIktdC0CHkR8YaIuCoi7oqIxRGx2zjtn1G1uysifhcRh66qWiVJkmaCKQ95EfEy4DjgQ8BOwEXAuRExq0/77YBzqnY7AUcDn4yI/VdNxZIkSdPflIc84HBgfmZ+LjN/mZmHAdcBr+/T/lDgj5l5WNX+c8ApwNtWUb2SJEnT3pSGvIhYC9gZWNDTawGwa5/Bdqlp/x1gdkSsOdoKJUmSZqap3pK3MbA6sLSn+1Jgsz7DbNan/RrV+CRJkh701pjqAirZ8zxquo3Xvq47EXEIcEj19O6IuGKoCjUdbAwsm+oiNDTn38zlvJvZnH8z12MmMvBUh7xlwL2svNVuU1beWtdxfZ/29wB/6m2cmScCJwJExKLMnD2RgjV1nH8zm/Nv5nLezWzOv5krIhZNZPgp3V2bmcuBxcBePb32opw9W+fHwLNq2i/KzBWjrVCSJGlmmupj8gCOAeZGxMER8biIOA7YAjgBICJOjYhTu9qfAGwVEcdW7Q8G5gIfW9WFS5IkTVdTvbuWzDwrIjYCjgI2B64A9s7Mq6sms3raXxURewMfp1xm5Y/Av2TmVweY3Imjq1xTwPk3szn/Zi7n3czm/Ju5JjTvInOs8xskSZI0E02H3bWSJEkaMUOeJElSC7Uu5EXEhhHxXxFxe0RcHREH9mkXEfHvEfGn6vGRiIi6tlo1Gsy7IyLiioi4LSKuiogjVnWtWtmg86+r/VoR8auI+MOqqlH1msy7iHhyRFwQEX+JiKUR8eZVWatW1mDduXZEnFDNt5si4psRseWqrlf3i4g3RcSiiLg7IuaP0/b/RcT1EXFrRJwUEWuPN/7WhTz+f3tnHmVXVeXh70cCCURCEqAREkKgQUF6hUEaGRyKlaDYisrSBjo2MwjLBkmnFSIOhEGWEpcLGRVDCIbRZgGtEqI2EpqArUwJAmIUUggBAlJJmDKZbP/Y58LNzX1V79Wreq/q1f7WOuvWPefcc/a7+766+5199jlwBbAG2A74PHCVpD1L6n0B+AywFzAe+CRwaqOEDEqpVncCjgVGAocBp0s6umFSBpWoVn8ZXwFeboRgQZdUpTtJ2wBzgR8CWwO7svE2k0Hjqfa7dya+Neh4fBWL5cBljRIyKOUF4EJgZmeVJH0MmApMAMYBuwDnddV4SwVeSBoGLAP+ycwWpbzZwBIzm1qo+wAwKy2WjKSTgFPM7IAGix1Qm+5Krr0Uf5bP6H1JgzJq1Z+knYE5wBTgR2Y2ppHyBu9Q4//Ni4AdzeyYxksalFGj/q4CXjezs9L5J4DvmVlduyoE9SPpQmCMmR1fofxGoN3MzknnE4AbzKzSFrBA643kvQdYlz3oiYVA2S+aPVNZV/WCxlCL7t4mudg/BDzRi7IFXVOr/i4DzgFW9rZgQZfUorsDgA5JD0h6Obn7xpbUCxpHLfq7BjhY0g6StsBH/e5qgIxB/ZTZLNulJegq0mpG3ruAFYW8FcCWVdRdAbwr5uU1jVp0l2ca/hxf2wsyBdVTtf4kHQEMNrPbGyFY0CW1fPfGAMfhbr+xwGLgpl6VLuiKWvS3CPgLsAR4DdgDOL9XpQt6ijKbBbp4R7aakfcGMLyQNxx4vYq6w4E3rJX81/2LWnQH+IRVfG7eJ8xsdS/KFnRNVfpLrqWLgXCt9x1q+e6tBG43swfNbBU+J+ggSVv1soxBZWrR31XAUHw+5TDgNmIkr79QZrNAJ+9IaD0jbxEwWNJuuby9KHflPZHKuqoXNIZadIekE0mTUM0sojObT7X62w2fNHyfpJfwl8z2KWJsXAPkDDamlu/eY0D+h3D2d3hAmkct+tsLn4vekX4YXwbsnwJqgr5Nmc2y1Mxe7eyiljLyzOxN/KVxvqRhkg4GPg3MLqn+Y2CKpNGSdgD+C5jVMGGDDahFd5I+D1wEHGpmzzRW0qCMGvT3OLAjsHdKJwNL09/PNU7iIKPG/5vXAkdI2lvSpsA3gPlmtrxxEgd5atTfg8CxkrZK+vsi8IKZ/bVxEgd5JA2WNBQYBAySNFRS2ZazPwZOkvQ+SSPxrWBnddmBmbVUAkYBdwBv4nMPJqX8D+Hu2KyecLdRR0oXk6KNI/V53S0G1uLD11n6QbPlH+ipWv0VrmkDnm+27AM91aI7fM/wJXhE58/waNumf4aBnGr437k1cAO+dNFyYD6wf7PlH8gJn1duhTQNn/P6BjA2V3cK/qP4NfwH15Cu2m+pJVSCIAiCIAgCp6XctUEQBEEQBIETRl4QBEEQBEELEkZeEARBEARBCxJGXhAEQRAEQQsSRl4QBEEQBEELEkZeEARBEARBCxJGXhD0YyTNk9TQdZAkTZNkktoa2W/qu11Se6P7DYIg6I+EkRcEDSQZR/m0TtJfJf067eQR9AKSdpT0bUkPS1omaa2klyX9r6QzY+/VvoGktvS9mNag/jZN+r9W0gJJa1L/Jzei/yDobcq2zgiCoPc5Lx03Bd4LfAY4RNL7zWxKDe0cC2zR08J1weXAzfjK+n2e9MK+HBgCLARuwndr2Br4IHAJvj1X7N858BiG6x98J4GX8G33gqAlCCMvCJqAmU3Ln0uaAPwKmCzpUjNrr7Kdhhta5vtc9ou9LiVNAn6EG3WfNbM7S+ocDFzRaNmCPsFbwL8AC8zsxTSCeG5zrIWOLQAACOhJREFURQqCniPctUHQBzCzu4Gn8D2V/xlA0rjkOpol6T2SbkkuxvXZfLiyOXl5l1faSP5OScslvSXpXkkHlckgaZCk0yTdL2mFpJWS/ixphqTdcvVK5+SlvHmSdpA0O8m6MrlIJ5X0t5mk0yXNkfSspNWSOpIL9eN13lIkbQlclk6PLjPwAMzsfuADJddPkDQ3ybRK0qLk8t3ItZvpIbn/vinp6XTNU5JOydU7TdLv0315XtJ5kjYptJXX++6S7kgyvClpvqSPVvi8QyRNlfRY0vVrku6TdGRJ3Xwf4yTdnKYNrJL0kKRPdnJf/03SPcntvUrSHyR9XdKQkrrZM7GNpKslvZj0/ISkEwp1ZwH3pNNzteG0hrZK8tSDma0xs7vM7MXeaD8Imk2M5AVB30HpWAyk+Efgt8AifHPxzfENqrtiP+As4DfADHzD688Cd0va28z++HbH0mbAncBE4DngxtTHOOAIfCPzP1XR50jgAXzz82uBEcCRwA2SRpvZ9FzdUcD3U/1fAa8A2wOHA3MknWJmM6rosxKfS338v5n9srOKZrY6fy7pVOAqfMP3/8Y3dG8DzgYOl3SwmS0vaepm3GCcA6xNMlwtaS0wHjgO+DlwN/Ap4Jv4aNJ3StraGdfd48AP8XtzFHCXpElmdktO3s2AXwAfwX8sXIG78T8H3JL0fU5JHzsBvwOeAWbj9+so4H8kTTSze/KVJV0DnAg8D9yG6/kA4AJggqRDzexvhT5GAPcDa4BbgaFJrpmS1pvZdaneHel4HHAvMC/XRnuJ7EEQdIWZRYoUqUEJN+CsJH8isD6lnVLeuKw+cFGF9uYV28ONkey64wtlp6b8Kwv5F6X8nwJDCmVDgG1z59NS3bayzwb8BNgkl78z0IG/5HcptDum5DNthRs2HcDmhbJ2oL3Ke31NkufCGnW0E7AaN3J3L5Rdmdq8ukwPwIPAiFz+LulzLwMWA6NzZSNwt/crwOBcfl7v0wv97Icbj8uA4bn8r6b6cwpt/UO6ZwYcVKGPcwt9fCxrq5B/fMq/rUQv2TNxZoVnYgYwKJf/PuBvwJMVnt1pjf5uFj7Hyc3oP1Kknk7hrg2CJpBcntMkfUvSrcBcfCTvEjN7tlB9Ke8EatTC/WY2q5A3E3+57p+TZRDwRWAlcJoVRrXMbLWZvVJln+uAs81sfe76xcCleJDJMYV2ny82YGYrkpwjSa7rbrJ9Om7URxf8O7AZcLmZPVUo+xrwOnBMmXsSmGq5ET4zewYfBR0BXGBmS3Jly4Gf4QEfo0vaWgGcn88ws4fw0dwR+Ahrxom4cTLFciNpZvYyPsoGUBYx+ixwYaGPX+BBNfsX6p6JPzsnmtnKQtkFwKtAWYT4W0mudbk+nsRH9/ZIbvUgCHqBcNcGQXPIJncb7vK6D7jGzK4vqbuwaHhVyUPFDDNbK2kpbkBl7I6Pnv3WzF7oRj95/pKMuiLz8M+8Tz5T0p7AV4AP40bZ0MJ1ZcZPtVRyf3fFvun462KBmS2T9Cgu7+54tG6eje45kN3Th0vKMqNvDG5w5XnEzF4vuWYe7tLcB7guGUm7AktKjNL859inpGxB3vjK8RxwYHYiaQtgL3zkcbKkkktYDexRkv8nMyubXvBcOo7ADeduI2lyaifPHWa2oJ52g6C/E0ZeEDQBMyt9S1bgpW52UzZnDHw0ZlDuPHs5LimpWytLK+Rnn+HtoAVJB+AGyGB8jtpPcRfpemBv4NO4S7e7ZMbVmBqvy2SsNBk/yy8aFdkoZJFsZK2zsk1Lyqq9l92Wl86fkbynZyRuNG9L7dGnnfUBGz6L3WUy7mbP0w6EkRcMaMLIC4K+T2/vaJG9hOsZNcvYrkL+u9Mxb+h8HQ8iOcTM5uUrS/oqbuTVw3zcjTkBXwevWjIZ3w08UVK+faFeb1HtvVxRyC/SE/Jm1z5qZvt2WrMJmNm4ZssQBH2RmJMXBMFTuKE3XtIOdbY1VtK4kvy2dHw0l7cr0FE08BIfqVMO8EjODuBASRM7q1iYX5fJ2FZSbwQ+yrgK+EMPyNgZ+1aYr5bJ9ShAcuk+DYzOL3WT45B0fKS7gpjZG7jBu6ekUd1tpwoy13FPjO4FwYAnjLwgGOCkOVlX4qNqPygGFKT17LatsrlBwHfya79J2hn4Eu6ey885bAdGSRpf6O8kPMKzLpLx86V0eouk0jaT2/g3uazr8QjWMyTtWqh+ATAcuL6b8yRrYSt8iZW3kbQfHtywArg9VzQTd6dOT4E0Wf1teGcUc2ad8nwPD0iZmYzdDZA0UlK9o3yvpuPYOtsJgoBw1wZB4JyHr+92OLBI0s/xyfA7Ah/FgyNmVdHOY6mdhyX9EjdUjsLng51lZk/n6l6CG3PzJf0EN1z2w7cauxVfS60uzOwGSZvj25rNlbQAX5cv29bsQN4JKMiuaU8T+a8AHkmyvYKPLh6Ij3yeXa9sVfB/wMmSPoBHombr5G0CnFoIZvgu8HHcxb1Q0hx8nbx/xZdRudjM5tcjjJnNlPR+PBL7aUlZFO4ofJmcD+NrI55WRzd/xOeGHi1pTWrfgNklUec9gqSpeBAN+CgtwAmSPpj+nm/1rdcYBE0jjLwgCDCzNZIOw1/Qx+LRm8KDF27H57dVwzLc2LgYOAEf9XoS+K6Z3Vjoc66kw/G5eUfhrrrf4e7FXegBIy/1MyMZJKcDh+IjYcNwF/XjwH9SGOUysysl/Rn4Mr6A9BZ4NOh0fM3CSsEEPcliXB/fTschuMv1/LTMSV7eNZIOBaYAk4Az8JHThcBkM7upJwQys/+QdFeSZyJuvHfgxth0Nhyp7U776yQdgX/mI4Et8edwPhtHH/cUh7Hx9ICDUsoIIy/ol8ist+d0B0EwEJBvr3avmbU1W5b+TJrTuBi4zsyOb6owQRD0a2JOXhAEQRAEQQsSRl4QBEEQBEELEkZeEARBEARBCxJz8oIgCIIgCFqQGMkLgiAIgiBoQcLIC4IgCIIgaEHCyAuCIAiCIGhBwsgLgiAIgiBoQcLIC4IgCIIgaEHCyAuCIAiCIGhB/g5x67FKcz691AAAAABJRU5ErkJggg==\n",
+      "text/plain": [
+       "<Figure size 720x720 with 1 Axes>"
+      ]
+     },
+     "metadata": {
+      "needs_background": "light"
+     },
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "plt.figure()\n",
+    "plt.figure(figsize=(10,10))\n",
+    "plt.xticks(fontsize=12)\n",
+    "plt.yticks(fontsize=14)\n",
+    "plt.xlabel('Principal Component - 1',fontsize=20)\n",
+    "plt.ylabel('Principal Component - 2',fontsize=20)\n",
+    "plt.title(\"Principal Component Analysis of Breast Cancer Dataset\",fontsize=20)\n",
+    "targets = ['Object 1', 'Object 2', 'Object 3' ,'Object 4']\n",
+    "colors = ['r', 'g','m','b']"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 31,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "['Object 1', 'Object 2', 'Object 3', 'Object 4']"
+      ]
+     },
+     "execution_count": 31,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "objects"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 30,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "'Object 2'"
+      ]
+     },
+     "execution_count": 30,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "target"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 37,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[False, False, False, False]\n"
+     ]
+    }
+   ],
+   "source": [
+    "lista = []\n",
+    "for target, color in zip(targets,colors):\n",
+    "    indicesToKeep = objects == target\n",
+    "    \n",
+    "    lista.append(indicesToKeep)\n",
+    "    #principal_stars_Df.loc[indicesToKeep, 'principal component 1']\n",
+    "print(lista)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 20,
+   "metadata": {},
+   "outputs": [
+    {
+     "ename": "KeyError",
+     "evalue": "False",
+     "output_type": "error",
+     "traceback": [
+      "\u001b[1;31m---------------------------------------------------------------------------\u001b[0m",
+      "\u001b[1;31mKeyError\u001b[0m                                  Traceback (most recent call last)",
+      "\u001b[1;32m~\\Anaconda3\\lib\\site-packages\\pandas\\core\\indexes\\base.py\u001b[0m in \u001b[0;36mget_loc\u001b[1;34m(self, key, method, tolerance)\u001b[0m\n\u001b[0;32m   2896\u001b[0m             \u001b[1;32mtry\u001b[0m\u001b[1;33m:\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n\u001b[1;32m-> 2897\u001b[1;33m                 \u001b[1;32mreturn\u001b[0m \u001b[0mself\u001b[0m\u001b[1;33m.\u001b[0m\u001b[0m_engine\u001b[0m\u001b[1;33m.\u001b[0m\u001b[0mget_loc\u001b[0m\u001b[1;33m(\u001b[0m\u001b[0mkey\u001b[0m\u001b[1;33m)\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n\u001b[0m\u001b[0;32m   2898\u001b[0m             \u001b[1;32mexcept\u001b[0m \u001b[0mKeyError\u001b[0m\u001b[1;33m:\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n",
+      "\u001b[1;32mpandas\\_libs\\index.pyx\u001b[0m in \u001b[0;36mpandas._libs.index.IndexEngine.get_loc\u001b[1;34m()\u001b[0m\n",
+      "\u001b[1;32mpandas\\_libs\\index.pyx\u001b[0m in \u001b[0;36mpandas._libs.index.IndexEngine.get_loc\u001b[1;34m()\u001b[0m\n",
+      "\u001b[1;32mpandas\\_libs\\hashtable_class_helper.pxi\u001b[0m in \u001b[0;36mpandas._libs.hashtable.PyObjectHashTable.get_item\u001b[1;34m()\u001b[0m\n",
+      "\u001b[1;32mpandas\\_libs\\hashtable_class_helper.pxi\u001b[0m in \u001b[0;36mpandas._libs.hashtable.PyObjectHashTable.get_item\u001b[1;34m()\u001b[0m\n",
+      "\u001b[1;31mKeyError\u001b[0m: False",
+      "\nDuring handling of the above exception, another exception occurred:\n",
+      "\u001b[1;31mKeyError\u001b[0m                                  Traceback (most recent call last)",
+      "\u001b[1;32m<ipython-input-20-b7d9410596f4>\u001b[0m in \u001b[0;36m<module>\u001b[1;34m\u001b[0m\n\u001b[0;32m      1\u001b[0m \u001b[1;32mfor\u001b[0m \u001b[0mtarget\u001b[0m\u001b[1;33m,\u001b[0m \u001b[0mcolor\u001b[0m \u001b[1;32min\u001b[0m \u001b[0mzip\u001b[0m\u001b[1;33m(\u001b[0m\u001b[0mtargets\u001b[0m\u001b[1;33m,\u001b[0m\u001b[0mcolors\u001b[0m\u001b[1;33m)\u001b[0m\u001b[1;33m:\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n\u001b[0;32m      2\u001b[0m     \u001b[0mindicesToKeep\u001b[0m \u001b[1;33m=\u001b[0m \u001b[0mobjects\u001b[0m \u001b[1;33m==\u001b[0m \u001b[0mtarget\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n\u001b[1;32m----> 3\u001b[1;33m     plt.scatter(principal_stars_Df.loc[indicesToKeep, 'principal component 1']\n\u001b[0m\u001b[0;32m      4\u001b[0m                , principal_stars_Df.loc[indicesToKeep, 'principal component 2'], c = color, s = 50)\n\u001b[0;32m      5\u001b[0m \u001b[1;33m\u001b[0m\u001b[0m\n",
+      "\u001b[1;32m~\\Anaconda3\\lib\\site-packages\\pandas\\core\\indexing.py\u001b[0m in \u001b[0;36m__getitem__\u001b[1;34m(self, key)\u001b[0m\n\u001b[0;32m   1416\u001b[0m                 \u001b[1;32mexcept\u001b[0m \u001b[1;33m(\u001b[0m\u001b[0mKeyError\u001b[0m\u001b[1;33m,\u001b[0m \u001b[0mIndexError\u001b[0m\u001b[1;33m,\u001b[0m \u001b[0mAttributeError\u001b[0m\u001b[1;33m)\u001b[0m\u001b[1;33m:\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n\u001b[0;32m   1417\u001b[0m                     \u001b[1;32mpass\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n\u001b[1;32m-> 1418\u001b[1;33m             \u001b[1;32mreturn\u001b[0m \u001b[0mself\u001b[0m\u001b[1;33m.\u001b[0m\u001b[0m_getitem_tuple\u001b[0m\u001b[1;33m(\u001b[0m\u001b[0mkey\u001b[0m\u001b[1;33m)\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n\u001b[0m\u001b[0;32m   1419\u001b[0m         \u001b[1;32melse\u001b[0m\u001b[1;33m:\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n\u001b[0;32m   1420\u001b[0m             \u001b[1;31m# we by definition only have the 0th axis\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n",
+      "\u001b[1;32m~\\Anaconda3\\lib\\site-packages\\pandas\\core\\indexing.py\u001b[0m in \u001b[0;36m_getitem_tuple\u001b[1;34m(self, tup)\u001b[0m\n\u001b[0;32m    803\u001b[0m     \u001b[1;32mdef\u001b[0m \u001b[0m_getitem_tuple\u001b[0m\u001b[1;33m(\u001b[0m\u001b[0mself\u001b[0m\u001b[1;33m,\u001b[0m \u001b[0mtup\u001b[0m\u001b[1;33m)\u001b[0m\u001b[1;33m:\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n\u001b[0;32m    804\u001b[0m         \u001b[1;32mtry\u001b[0m\u001b[1;33m:\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n\u001b[1;32m--> 805\u001b[1;33m             \u001b[1;32mreturn\u001b[0m \u001b[0mself\u001b[0m\u001b[1;33m.\u001b[0m\u001b[0m_getitem_lowerdim\u001b[0m\u001b[1;33m(\u001b[0m\u001b[0mtup\u001b[0m\u001b[1;33m)\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n\u001b[0m\u001b[0;32m    806\u001b[0m         \u001b[1;32mexcept\u001b[0m \u001b[0mIndexingError\u001b[0m\u001b[1;33m:\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n\u001b[0;32m    807\u001b[0m             \u001b[1;32mpass\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n",
+      "\u001b[1;32m~\\Anaconda3\\lib\\site-packages\\pandas\\core\\indexing.py\u001b[0m in \u001b[0;36m_getitem_lowerdim\u001b[1;34m(self, tup)\u001b[0m\n\u001b[0;32m    927\u001b[0m         \u001b[1;32mfor\u001b[0m \u001b[0mi\u001b[0m\u001b[1;33m,\u001b[0m \u001b[0mkey\u001b[0m \u001b[1;32min\u001b[0m \u001b[0menumerate\u001b[0m\u001b[1;33m(\u001b[0m\u001b[0mtup\u001b[0m\u001b[1;33m)\u001b[0m\u001b[1;33m:\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n\u001b[0;32m    928\u001b[0m             \u001b[1;32mif\u001b[0m \u001b[0mis_label_like\u001b[0m\u001b[1;33m(\u001b[0m\u001b[0mkey\u001b[0m\u001b[1;33m)\u001b[0m \u001b[1;32mor\u001b[0m \u001b[0misinstance\u001b[0m\u001b[1;33m(\u001b[0m\u001b[0mkey\u001b[0m\u001b[1;33m,\u001b[0m \u001b[0mtuple\u001b[0m\u001b[1;33m)\u001b[0m\u001b[1;33m:\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n\u001b[1;32m--> 929\u001b[1;33m                 \u001b[0msection\u001b[0m \u001b[1;33m=\u001b[0m \u001b[0mself\u001b[0m\u001b[1;33m.\u001b[0m\u001b[0m_getitem_axis\u001b[0m\u001b[1;33m(\u001b[0m\u001b[0mkey\u001b[0m\u001b[1;33m,\u001b[0m \u001b[0maxis\u001b[0m\u001b[1;33m=\u001b[0m\u001b[0mi\u001b[0m\u001b[1;33m)\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n\u001b[0m\u001b[0;32m    930\u001b[0m \u001b[1;33m\u001b[0m\u001b[0m\n\u001b[0;32m    931\u001b[0m                 \u001b[1;31m# we have yielded a scalar ?\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n",
+      "\u001b[1;32m~\\Anaconda3\\lib\\site-packages\\pandas\\core\\indexing.py\u001b[0m in \u001b[0;36m_getitem_axis\u001b[1;34m(self, key, axis)\u001b[0m\n\u001b[0;32m   1848\u001b[0m         \u001b[1;31m# fall thru to straight lookup\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n\u001b[0;32m   1849\u001b[0m         \u001b[0mself\u001b[0m\u001b[1;33m.\u001b[0m\u001b[0m_validate_key\u001b[0m\u001b[1;33m(\u001b[0m\u001b[0mkey\u001b[0m\u001b[1;33m,\u001b[0m \u001b[0maxis\u001b[0m\u001b[1;33m)\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n\u001b[1;32m-> 1850\u001b[1;33m         \u001b[1;32mreturn\u001b[0m \u001b[0mself\u001b[0m\u001b[1;33m.\u001b[0m\u001b[0m_get_label\u001b[0m\u001b[1;33m(\u001b[0m\u001b[0mkey\u001b[0m\u001b[1;33m,\u001b[0m \u001b[0maxis\u001b[0m\u001b[1;33m=\u001b[0m\u001b[0maxis\u001b[0m\u001b[1;33m)\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n\u001b[0m\u001b[0;32m   1851\u001b[0m \u001b[1;33m\u001b[0m\u001b[0m\n\u001b[0;32m   1852\u001b[0m \u001b[1;33m\u001b[0m\u001b[0m\n",
+      "\u001b[1;32m~\\Anaconda3\\lib\\site-packages\\pandas\\core\\indexing.py\u001b[0m in \u001b[0;36m_get_label\u001b[1;34m(self, label, axis)\u001b[0m\n\u001b[0;32m    158\u001b[0m             \u001b[1;32mraise\u001b[0m \u001b[0mIndexingError\u001b[0m\u001b[1;33m(\u001b[0m\u001b[1;34m\"no slices here, handle elsewhere\"\u001b[0m\u001b[1;33m)\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n\u001b[0;32m    159\u001b[0m \u001b[1;33m\u001b[0m\u001b[0m\n\u001b[1;32m--> 160\u001b[1;33m         \u001b[1;32mreturn\u001b[0m \u001b[0mself\u001b[0m\u001b[1;33m.\u001b[0m\u001b[0mobj\u001b[0m\u001b[1;33m.\u001b[0m\u001b[0m_xs\u001b[0m\u001b[1;33m(\u001b[0m\u001b[0mlabel\u001b[0m\u001b[1;33m,\u001b[0m \u001b[0maxis\u001b[0m\u001b[1;33m=\u001b[0m\u001b[0maxis\u001b[0m\u001b[1;33m)\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n\u001b[0m\u001b[0;32m    161\u001b[0m \u001b[1;33m\u001b[0m\u001b[0m\n\u001b[0;32m    162\u001b[0m     \u001b[1;32mdef\u001b[0m \u001b[0m_get_loc\u001b[0m\u001b[1;33m(\u001b[0m\u001b[0mself\u001b[0m\u001b[1;33m,\u001b[0m \u001b[0mkey\u001b[0m\u001b[1;33m:\u001b[0m \u001b[0mint\u001b[0m\u001b[1;33m,\u001b[0m \u001b[0maxis\u001b[0m\u001b[1;33m:\u001b[0m \u001b[0mint\u001b[0m\u001b[1;33m)\u001b[0m\u001b[1;33m:\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n",
+      "\u001b[1;32m~\\Anaconda3\\lib\\site-packages\\pandas\\core\\generic.py\u001b[0m in \u001b[0;36mxs\u001b[1;34m(self, key, axis, level, drop_level)\u001b[0m\n\u001b[0;32m   3735\u001b[0m             \u001b[0mloc\u001b[0m\u001b[1;33m,\u001b[0m \u001b[0mnew_index\u001b[0m \u001b[1;33m=\u001b[0m \u001b[0mself\u001b[0m\u001b[1;33m.\u001b[0m\u001b[0mindex\u001b[0m\u001b[1;33m.\u001b[0m\u001b[0mget_loc_level\u001b[0m\u001b[1;33m(\u001b[0m\u001b[0mkey\u001b[0m\u001b[1;33m,\u001b[0m \u001b[0mdrop_level\u001b[0m\u001b[1;33m=\u001b[0m\u001b[0mdrop_level\u001b[0m\u001b[1;33m)\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n\u001b[0;32m   3736\u001b[0m         \u001b[1;32melse\u001b[0m\u001b[1;33m:\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n\u001b[1;32m-> 3737\u001b[1;33m             \u001b[0mloc\u001b[0m \u001b[1;33m=\u001b[0m \u001b[0mself\u001b[0m\u001b[1;33m.\u001b[0m\u001b[0mindex\u001b[0m\u001b[1;33m.\u001b[0m\u001b[0mget_loc\u001b[0m\u001b[1;33m(\u001b[0m\u001b[0mkey\u001b[0m\u001b[1;33m)\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n\u001b[0m\u001b[0;32m   3738\u001b[0m \u001b[1;33m\u001b[0m\u001b[0m\n\u001b[0;32m   3739\u001b[0m             \u001b[1;32mif\u001b[0m \u001b[0misinstance\u001b[0m\u001b[1;33m(\u001b[0m\u001b[0mloc\u001b[0m\u001b[1;33m,\u001b[0m \u001b[0mnp\u001b[0m\u001b[1;33m.\u001b[0m\u001b[0mndarray\u001b[0m\u001b[1;33m)\u001b[0m\u001b[1;33m:\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n",
+      "\u001b[1;32m~\\Anaconda3\\lib\\site-packages\\pandas\\core\\indexes\\base.py\u001b[0m in \u001b[0;36mget_loc\u001b[1;34m(self, key, method, tolerance)\u001b[0m\n\u001b[0;32m   2897\u001b[0m                 \u001b[1;32mreturn\u001b[0m \u001b[0mself\u001b[0m\u001b[1;33m.\u001b[0m\u001b[0m_engine\u001b[0m\u001b[1;33m.\u001b[0m\u001b[0mget_loc\u001b[0m\u001b[1;33m(\u001b[0m\u001b[0mkey\u001b[0m\u001b[1;33m)\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n\u001b[0;32m   2898\u001b[0m             \u001b[1;32mexcept\u001b[0m \u001b[0mKeyError\u001b[0m\u001b[1;33m:\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n\u001b[1;32m-> 2899\u001b[1;33m                 \u001b[1;32mreturn\u001b[0m \u001b[0mself\u001b[0m\u001b[1;33m.\u001b[0m\u001b[0m_engine\u001b[0m\u001b[1;33m.\u001b[0m\u001b[0mget_loc\u001b[0m\u001b[1;33m(\u001b[0m\u001b[0mself\u001b[0m\u001b[1;33m.\u001b[0m\u001b[0m_maybe_cast_indexer\u001b[0m\u001b[1;33m(\u001b[0m\u001b[0mkey\u001b[0m\u001b[1;33m)\u001b[0m\u001b[1;33m)\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n\u001b[0m\u001b[0;32m   2900\u001b[0m         \u001b[0mindexer\u001b[0m \u001b[1;33m=\u001b[0m \u001b[0mself\u001b[0m\u001b[1;33m.\u001b[0m\u001b[0mget_indexer\u001b[0m\u001b[1;33m(\u001b[0m\u001b[1;33m[\u001b[0m\u001b[0mkey\u001b[0m\u001b[1;33m]\u001b[0m\u001b[1;33m,\u001b[0m \u001b[0mmethod\u001b[0m\u001b[1;33m=\u001b[0m\u001b[0mmethod\u001b[0m\u001b[1;33m,\u001b[0m \u001b[0mtolerance\u001b[0m\u001b[1;33m=\u001b[0m\u001b[0mtolerance\u001b[0m\u001b[1;33m)\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n\u001b[0;32m   2901\u001b[0m         \u001b[1;32mif\u001b[0m \u001b[0mindexer\u001b[0m\u001b[1;33m.\u001b[0m\u001b[0mndim\u001b[0m \u001b[1;33m>\u001b[0m \u001b[1;36m1\u001b[0m \u001b[1;32mor\u001b[0m \u001b[0mindexer\u001b[0m\u001b[1;33m.\u001b[0m\u001b[0msize\u001b[0m \u001b[1;33m>\u001b[0m \u001b[1;36m1\u001b[0m\u001b[1;33m:\u001b[0m\u001b[1;33m\u001b[0m\u001b[1;33m\u001b[0m\u001b[0m\n",
+      "\u001b[1;32mpandas\\_libs\\index.pyx\u001b[0m in \u001b[0;36mpandas._libs.index.IndexEngine.get_loc\u001b[1;34m()\u001b[0m\n",
+      "\u001b[1;32mpandas\\_libs\\index.pyx\u001b[0m in \u001b[0;36mpandas._libs.index.IndexEngine.get_loc\u001b[1;34m()\u001b[0m\n",
+      "\u001b[1;32mpandas\\_libs\\hashtable_class_helper.pxi\u001b[0m in \u001b[0;36mpandas._libs.hashtable.PyObjectHashTable.get_item\u001b[1;34m()\u001b[0m\n",
+      "\u001b[1;32mpandas\\_libs\\hashtable_class_helper.pxi\u001b[0m in \u001b[0;36mpandas._libs.hashtable.PyObjectHashTable.get_item\u001b[1;34m()\u001b[0m\n",
+      "\u001b[1;31mKeyError\u001b[0m: False"
+     ]
+    }
+   ],
+   "source": [
+    "for target, color in zip(targets,colors):\n",
+    "    indicesToKeep = objects == target\n",
+    "    plt.scatter(principal_stars_Df.loc[indicesToKeep, 'principal component 1']\n",
+    "               , principal_stars_Df.loc[indicesToKeep, 'principal component 2'], c = color, s = 50)\n",
+    "\n",
+    "plt.legend(targets,prop={'size': 15})"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### 2.3 Cálculo de autovectores y autovalores (eigenvector/eigenvalue)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Calculamos la matriz de covarianza\n",
+    "print('NumPy covariance matrix: \\n%s' %np.cov(X_std.T))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#Calculamos los autovalores y autovectores de la matriz y los mostramos\n",
+    "\n",
+    "cov_mat = np.cov(X_std.T)\n",
+    "\n",
+    "#eig_vals, eig_vecs = np.linalg.eig(cov_mat)\n",
+    "from scipy.linalg import svd\n",
+    "U, s, VT = svd(cov_mat)\n",
+    "\n",
+    "print('U \\n%s' %U)\n",
+    "print('s \\n%s' %s)\n",
+    "print('VT \\n%s' %VT)\n",
+    "\n",
+    "\n",
+    "\n",
+    "#print('Eigenvectors \\n%s' %eig_vecs)\n",
+    "#print('\\nEigenvalues \\n%s' %eig_vals)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "pca = PCA(n_components=2)\n",
+    "pca.fit(X_std)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "print(pca.components_)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#  Hacemos una lista de parejas (autovector, autovalor) \n",
+    "eig_pairs = [(np.abs(eig_vals[i]), eig_vecs[:,i]) for i in range(len(eig_vals))]\n",
+    "\n",
+    "# Ordenamos estas parejas den orden descendiente con la función sort\n",
+    "eig_pairs.sort(key=lambda x: x[0], reverse=True)\n",
+    "\n",
+    "# Visualizamos la lista de autovalores en orden desdenciente\n",
+    "print('Autovalores en orden descendiente:')\n",
+    "for i in eig_pairs:\n",
+    "    print(i[0])"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### 2.4 Seleccionamos los los autovectores correspondientes a las componentes principales"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# A partir de los autovalores, calculamos la varianza explicada\n",
+    "tot = sum(eig_vals)\n",
+    "var_exp = [(i / tot)*100 for i in sorted(eig_vals, reverse=True)]\n",
+    "cum_var_exp = np.cumsum(var_exp)\n",
+    "\n",
+    "# Representamos en un diagrama de barras la varianza explicada por cada autovalor, y la acumulada\n",
+    "with plt.style.context('seaborn-pastel'):\n",
+    "    plt.figure(figsize=(6, 4))\n",
+    "\n",
+    "    plt.bar(range(4), var_exp, alpha=0.5, align='center',\n",
+    "            label='Varianza individual explicada', color='g')\n",
+    "    plt.step(range(4), cum_var_exp, where='mid', linestyle='--', label='Varianza explicada acumulada')\n",
+    "    plt.ylabel('Ratio de Varianza Explicada')\n",
+    "    plt.xlabel('Componentes Principales')\n",
+    "    plt.legend(loc='best')\n",
+    "    plt.tight_layout()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### 2.5  Proyectamos los datos sobre un espacio de dimensionalidad menor."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "#Generamos la matríz a partir de los pares autovalor-autovector\n",
+    "matrix_w = np.hstack((eig_pairs[0][1].reshape(4,1),\n",
+    "                      eig_pairs[1][1].reshape(4,1)))\n",
+    "\n",
+    "print('Matriz W:\\n', matrix_w)\n",
+    "\n",
+    "Y = X_std.dot(matrix_w)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df.insert(17, \"Objects\", [\"Object 1\",\"Object 2\",\"Object 3\",\"Object 4\"]) "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df.head()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "y = df.iloc[:,17].values\n",
+    "# El vector y contiene los valores de la 4 columna (especie)para todas las filas"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "with plt.style.context('seaborn-whitegrid'):\n",
+    "    plt.figure(figsize=(6, 4))\n",
+    "    for lab, col in zip(('Object 1', 'Object 2', 'Object 3','Object 4'),\n",
+    "                        ('magenta', 'cyan', 'limegreen','blue')):\n",
+    "        plt.scatter(Y[y==lab, 0],\n",
+    "                    Y[y==lab, 1],\n",
+    "                    label=lab,\n",
+    "                    c=col)\n",
+    "    plt.xlabel('Componente Principal 1')\n",
+    "    plt.ylabel('Componente Principal 2')\n",
+    "    plt.legend(loc='lower center')\n",
+    "    plt.tight_layout()\n",
+    "    plt.show()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.7.4"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}
